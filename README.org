@@ -6,6 +6,8 @@ These are instructions for LXC 3.0.3 in Debian GNU/Linux Buster
   1. To create a privileged container named "test-buster-1" with
      several things installed:
      : sudo lxc-create --name test-buster-1 --template debian -- --release buster --package emacs,tightvncserver,xfce4,xfce4-goodies
+  2. Start the container:
+     : sudo lxc-start --name test-buster-1
 
 * Copyright
 
