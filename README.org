@@ -1,3 +1,21 @@
+* Introduction
+
+These instructions are for setting up a privileged LXC container with
+a Haskell development environment. The container runs Debian GNU/Linux
+10 (code-named Buster). One can connect to the container via SSH and
+VNC.
+
+* Prerequisites
+
+[[http://linuxcontainers.org/][LXC]] (Linux Containers) is a virtualization method specific to
+operating systems based on the Linux kernel. Therefore, you need to
+have a Linux-based operating system to follow these
+instructions. Furthermore, the instructions are written for the
+GNU/Linux Debian Buster operating system, though they should be
+applicable to other GNU/Linux distributions (possibly with minor
+modifications).
+
+
 * Instructions
 
 These are instructions for LXC 3.0.3 in Debian GNU/Linux Buster
