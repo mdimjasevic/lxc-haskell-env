@@ -22,7 +22,7 @@ These are instructions for LXC 3.0.3 in Debian GNU/Linux Buster.
 
   1. To create a privileged container named "test-buster-1" with
      several things installed:
-     : sudo lxc-create --name test-buster-1 --template debian -- --release buster --package sudo,emacs,xfonts-base,tightvncserver,xfce4,xfce4-goodies,haskell-platform,elpa-lsp-haskell,firefox-esr,xserver-xorg-core
+     : sudo lxc-create --name test-buster-1 --template debian -- --release buster --package sudo,emacs,xfonts-base,tightvncserver,xfce4,xfce4-goodies,haskell-platform,elpa-lsp-haskell,firefox-esr,xserver-xorg-core,curl
   2. Start the container:
      : sudo lxc-start --name test-buster-1
   3. Set a password for the root user:
@@ -38,24 +38,30 @@ These are instructions for LXC 3.0.3 in Debian GNU/Linux Buster.
   8. Copy the public SSH key of your user on the host machine to the
      =dev= user in the container:
      : ssh-copy-id -i ~/.ssh/id_rsa.pub dev@192.168.122.195
-  9. Start the VNC server as the =dev= user:
-     : sudo lxc-attach --name test-buster-1 -- su - dev -c vncserver
-     This will ask for a password so create one.
-  10. Kill the VNC server:
+  9. Install the Keybase program (the 64-bit version):
+     : sudo lxc-attach --name test-buster-1 -- curl --output /tmp/keybase.deb --create-dirs --remote-name https://prerelease.keybase.io/keybase_amd64.deb
+     : sudo lxc-attach --name test-buster-1 -- sudo apt install -y /tmp/keybase.deb
+     : sudo lxc-attach --name test-buster-1 -- su - dev -c run_keybase
+  10. Start the VNC server as the =dev= user:
+      : sudo lxc-attach --name test-buster-1 -- su - dev -c vncserver
+      This will ask for a password so create one.
+  11. Kill the VNC server:
       : sudo lxc-attach --name test-buster-1 -- su - dev -c "vncserver -kill :1"
-  11. Put the following in =~/.vnc/xstartup= in the container:
+  12. Put the following in =~/.vnc/xstartup= in the container:
       #+BEGIN_SRC bash
 	#!/bin/bash
 	xrdb $HOME/.Xresources
 	startxfce4 &
       #+END_SRC
-  12. Start the VNC server again and set the screen resolution:
+  13. Start the VNC server again and set the screen resolution:
       : sudo lxc-attach --name test-buster-1 -- su - dev -c "vncserver -geometry 1920x1080"
-  13. Start a VNC viewer on the host machine, e.g., GNOME's Remote
+  14. Start a VNC viewer on the host machine, e.g., GNOME's Remote
       Desktop Viewer. Provide the container's IP address and a port
       (the port is typically 5901).
 * To be done
-** TODO Add Keybase installation instructions
+** TODO Figure out copy-pasting from and to the container
+** TODO Share the camera devices with the container
+** TODO Set up xmonad
 ** TODO Decrease the display lag
    - Maybe there is something to configure in =/etc/X11= as generated
      by the =gtf= tool from the =xserver-xorg-core= package with
