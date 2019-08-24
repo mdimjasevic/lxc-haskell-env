@@ -22,7 +22,7 @@ These are instructions for LXC 3.0.3 in Debian GNU/Linux Buster.
 
   1. To create a privileged container named "test-buster-1" with
      several things installed:
-     : sudo lxc-create --name test-buster-1 --template debian -- --release buster --package sudo,emacs,xfonts-base,tightvncserver,xfce4,xfce4-goodies
+     : sudo lxc-create --name test-buster-1 --template debian -- --release buster --package sudo,emacs,xfonts-base,tightvncserver,xfce4,xfce4-goodies,haskell-platform,elpa-lsp-haskell,firefox-esr,xserver-xorg-core
   2. Start the container:
      : sudo lxc-start --name test-buster-1
   3. Set a password for the root user:
@@ -49,9 +49,17 @@ These are instructions for LXC 3.0.3 in Debian GNU/Linux Buster.
 	xrdb $HOME/.Xresources
 	startxfce4 &
       #+END_SRC
-  12. Start the VNC server again:
-      : sudo lxc-attach --name test-buster-1 -- su - dev -c vncserver
-* TODO Add Keybase installation instructions
+  12. Start the VNC server again and set the screen resolution:
+      : sudo lxc-attach --name test-buster-1 -- su - dev -c "vncserver -geometry 1920x1080"
+  13. Start a VNC viewer on the host machine, e.g., GNOME's Remote
+      Desktop Viewer. Provide the container's IP address and a port
+      (the port is typically 5901).
+* To be done
+** TODO Add Keybase installation instructions
+** TODO Decrease the display lag
+   - Maybe there is something to configure in =/etc/X11= as generated
+     by the =gtf= tool from the =xserver-xorg-core= package with
+     ModeLine and a dummy driver.
 * Copyright
 
 To the extent possible under law, Marko Dimjašević has waived all
