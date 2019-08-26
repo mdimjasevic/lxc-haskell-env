@@ -23,7 +23,7 @@ These are instructions for LXC 3.0.3 in Debian GNU/Linux Buster.
 
   1. To create a privileged container named "buster-1" with
      several things installed:
-     : sudo lxc-create --name buster-1 --template debian -- --release buster --package sudo,emacs,xfonts-base,tightvncserver,xfce4,xfce4-goodies,haskell-platform,haskell-stack,elpa-lsp-haskell,firefox-esr,xserver-xorg-core,curl,autocutsel,git
+     : sudo lxc-create --name buster-1 --template debian -- --release buster --package sudo,emacs,xfonts-base,tightvncserver,xfce4,xfce4-goodies,haskell-platform,haskell-stack,elpa-haskell-mode,elpa-smex,firefox-esr,xserver-xorg-core,curl,autocutsel,git,unar,rsync
   2. Start the container:
      : sudo lxc-start --name buster-1
   3. Set a password for the root user:
@@ -61,7 +61,13 @@ These are instructions for LXC 3.0.3 in Debian GNU/Linux Buster.
       Desktop Viewer. Provide the container's IP address and a port
       (the port is typically 5901).
 * To be done
-** TODO Share the camera devices with the container
+** TODO Share the camera, microphone and speaker devices with the container
+** TODO Figure out keyboard capturing
+   - When I'm in the VNC session, pressing Ctrl+W closes the session window
+     instead of a tab in Firefox in the container. See how to fix this. I
+     learned that Ctrl+W is a hard-coded keyboard shortcut in GNOME's VNC
+     viewer that closes a VNC session.
+** TODO Have the VNC server run on boot
 ** TODO Set up xmonad
 ** TODO Decrease the display lag
    - Maybe there is something to configure in =/etc/X11= as generated
