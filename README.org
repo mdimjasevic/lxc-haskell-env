@@ -65,7 +65,8 @@ These are instructions for LXC 3.0.3 in Debian GNU/Linux Buster.
       : sudo apt-get install remmina remmina-plugin-vnc
   15. Start a VNC viewer on the host machine. Provide the container's IP
       address and a port (the port is typically 5901).
-** Installing Nix
+
+** Installing Nix (an unfinished section)
 One might want to install the Nix package manager as a number of Haskell
 projects use it as a build system. Unfortunately, there is no official Debian
 binary package for Nix. Therefore, we will build the package ourselves from an
@@ -91,6 +92,20 @@ LXC container:
      : sudo lxc-attach --name buster-1 -- su - dev -c "sudo apt-get install -y libdbd-sqlite3-perl libwww-curl-perl libboost-context1.67.0 libbrotli1 libreadline7 libsodium23 perl-dbdabi-94 readline-common"
   8. Finally install the =nix_2.2.1-1_amd64.deb= package:
      : sudo lxc-attach --name buster-1 -- su - dev -c "sudo dpkg -i /tmp/nix_2.2.1-1_amd64.deb"
+  9. Add the following to =/etc/nix/nix.conf= in the container (create the
+     file if it does not exist):
+     : build-use-sandbox = false
+  10. To have =nixpkgs= working properly, run the following in the container:
+      : nix-channel --add https://nixos.org/channels/nixpkgs-unstable
+      : nix-channel --update
+  11. Stop the container. On the host machine add the following line to
+      =/etc/sysctl.d/80-lxc-userns.conf= (create the file if it does not
+      exist):
+      : kernel.unprivileged_userns_clone=1
+  12. Restart =sysctl= on the host:
+      : sudo sysctl --system
+  13. Start the LXC container:
+      : sudo lxc-start --name buster-1
 * To be done
 ** TODO Share the camera, microphone and speaker devices with the container
 ** TODO Figure out keyboard capturing
