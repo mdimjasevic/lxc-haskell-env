@@ -23,7 +23,7 @@ These are instructions for LXC 3.0.3 in Debian GNU/Linux Buster.
 
   1. To create a privileged container named "buster-1" with
      several things installed:
-     : sudo lxc-create --name buster-1 --template debian -- --release buster --package sudo,emacs,xfonts-base,tightvncserver,xfce4,xfce4-goodies,haskell-platform,haskell-stack,elpa-haskell-mode,elpa-smex,firefox-esr,xserver-xorg-core,curl,autocutsel,git,unar,rsync
+     : sudo lxc-create --name buster-1 --template debian -- --release buster --package sudo,emacs,xfonts-base,tightvncserver,xfce4,xfce4-goodies,haskell-platform,haskell-stack,elpa-haskell-mode,elpa-smex,firefox-esr,xserver-xorg-core,curl,autocutsel,git,unar,rsync,bzip2
   2. Start the container:
      : sudo lxc-start --name buster-1
   3. Set a password for the root user:
@@ -57,9 +57,40 @@ These are instructions for LXC 3.0.3 in Debian GNU/Linux Buster.
       #+END_SRC
   13. Start the VNC server again and set the screen resolution:
       : sudo lxc-attach --name buster-1 -- su - dev -c "vncserver -geometry 1920x1080"
-  14. Start a VNC viewer on the host machine, e.g., GNOME's Remote
-      Desktop Viewer. Provide the container's IP address and a port
-      (the port is typically 5901).
+  14. Install a VNC viewer on the host machine. I recommend Remmina, though
+      others will work. GNOME's Remote Desktop Viewer captures certain
+      keystrokes such as Ctrl+W, which means they cannot be used in the VNC
+      session; this is why I decided to go with another VNC viewer, namely
+      Remmina.
+      : sudo apt-get install remmina remmina-plugin-vnc
+  15. Start a VNC viewer on the host machine. Provide the container's IP
+      address and a port (the port is typically 5901).
+** Installing Nix
+One might want to install the Nix package manager as a number of Haskell
+projects use it as a build system. Unfortunately, there is no official Debian
+binary package for Nix. Therefore, we will build the package ourselves from an
+unofficial [[https://github.com/KaiHa/nix-debian][Debian source package]]. To install the Nix package manager in the
+LXC container:
+
+  1. Install =git-buildpackage= on the host:
+     : sudo apt-get install git-buildpackage
+  2. Create a Debian GNU/Linux Buster image that will be used for building the
+     package for Nix:
+     : DIST=buster git-pbuilder create
+  3. Get the unofficial Debian source package:
+     : git clone https://github.com/KaiHa/nix-debian.git
+     : cd nix-debian
+  4. Build a Debian binary package for Nix:
+     : gbp buildpackage --git-pbuilder --git-dist=buster
+  5. Find two Debian packages in =../nix.deb-export/=. My host machine is the
+     =amd64= architecture, so for Nix 2.2.1 the packages are
+     =nix_2.2.1-1_amd64.deb= and =nix-dbgsym_2.2.1-1_amd64.deb=.
+  6. Copy the =nix_2.2.1-1_amd64.deb= package to the LXC container:
+     : rsync -a --progress *deb dev@192.168.122.142:/tmp/
+  7. In the LXC container install dependencies for the binary package for Nix:
+     : sudo lxc-attach --name buster-1 -- su - dev -c "sudo apt-get install -y libdbd-sqlite3-perl libwww-curl-perl libboost-context1.67.0 libbrotli1 libreadline7 libsodium23 perl-dbdabi-94 readline-common"
+  8. Finally install the =nix_2.2.1-1_amd64.deb= package:
+     : sudo lxc-attach --name buster-1 -- su - dev -c "sudo dpkg -i /tmp/nix_2.2.1-1_amd64.deb"
 * To be done
 ** TODO Share the camera, microphone and speaker devices with the container
 ** TODO Figure out keyboard capturing
