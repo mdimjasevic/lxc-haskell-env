@@ -107,13 +107,15 @@ LXC container:
   13. Start the LXC container:
       : sudo lxc-start --name buster-1
 * To be done
+** TODO Start the VNC server on system boot
+   - This is not happening right now so enable it such that one doesn't have
+     to SSH before VNCing.
+** TODO Create LXC containers with a disk stored in LVM
+   - The default is a 20 GB root partition =/=, which can be too little,
+     especially when Nix is used. When creating a container with =lxc-create=,
+     there is an option =--bdev= that can take "lvm" as a value and further
+     arguments can be provided, as explained in the man pages of =lxc-create=.
 ** TODO Share the camera, microphone and speaker devices with the container
-** TODO Figure out keyboard capturing
-   - When I'm in the VNC session, pressing Ctrl+W closes the session window
-     instead of a tab in Firefox in the container. See how to fix this. I
-     learned that Ctrl+W is a hard-coded keyboard shortcut in GNOME's VNC
-     viewer that closes a VNC session.
-** TODO Have the VNC server run on boot
 ** TODO Set up xmonad
 ** TODO Decrease the display lag
    - Maybe there is something to configure in =/etc/X11= as generated
