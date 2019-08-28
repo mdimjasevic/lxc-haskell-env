@@ -19,51 +19,65 @@ modifications).
 
 * Instructions
 
-These are instructions for LXC 3.0.3 in Debian GNU/Linux Buster.
+These are instructions for LXC 3.0.3 in Debian GNU/Linux Buster. If you do not
+use Logical Volume Management (LVM), skip steps that are tagged with "(LVM)".
 
-  1. To create a privileged container named "buster-1" with
-     several things installed:
-     : sudo lxc-create --name buster-1 --template debian -- --release buster --package sudo,emacs,xfonts-base,tightvncserver,xfce4,xfce4-goodies,haskell-platform,haskell-stack,elpa-haskell-mode,elpa-smex,firefox-esr,xserver-xorg-core,curl,autocutsel,git,unar,rsync,bzip2
-  2. Start the container:
-     : sudo lxc-start --name buster-1
-  3. Set a password for the root user:
-     : sudo lxc-attach --name buster-1 passwd
-  4. Add a user =dev= to the container:
-     : sudo lxc-attach --name buster-1 -- useradd -m -s /bin/bash dev
-  5. Set the password for the =dev= user:
-     : sudo lxc-attach --name buster-1 -- passwd dev
-  6. Add =dev= to the =sudo= group for the root privileges:
-     : sudo lxc-attach --name buster-1 -- usermod -a -G sudo dev
-  7. (Something here is missing about =TTY=; it is resolved by adding
-     the =dev= user via =visudo=).
-  8. Copy the public SSH key of your user on the host machine to the
-     =dev= user in the container:
-     : ssh-copy-id -i ~/.ssh/id_rsa.pub dev@192.168.122.195
-  9. Install the Keybase program (the 64-bit version):
-     : sudo lxc-attach --name buster-1 -- curl --output /tmp/keybase.deb --remote-name https://prerelease.keybase.io/keybase_amd64.deb
-     : sudo lxc-attach --name buster-1 -- sudo apt install -y /tmp/keybase.deb
-     : sudo lxc-attach --name buster-1 -- su - dev -c run_keybase
-  10. Start the VNC server as the =dev= user:
-      : sudo lxc-attach --name buster-1 -- su - dev -c vncserver
+  1. Choose a name for the LXC container. In this running example =buster-2=
+     will be used:
+     : export CNAME=buster-2
+  2. (LVM) Choose an LVM volume group (set to the group you have on your host
+     machine):
+     : export VGNAME=howard-vg
+  3. (LVM) Choose an LVM volume:
+     : export LVNAME=$CNAME
+  4. (LVM) Choose the size of the container's root file system:
+     : export FSSIZE=50G
+  5. (LVM) To create a privileged container named "buster-2" with several
+     things installed, where the root file system is stored in an LVM volume:
+     : sudo lxc-create --name $CNAME --bdev lvm --lvname $LVNAME --vgname $VGNAME --fssize $FSSIZE --template debian -- --release buster --package sudo,emacs,xfonts-base,tightvncserver,xfce4,xfce4-goodies,haskell-platform,haskell-stack,elpa-haskell-mode,elpa-smex,firefox-esr,xserver-xorg-core,curl,autocutsel,git,unar,rsync,bzip2
+  6. To create a privileged container named "buster-2" with several
+     things installed, where the root file system is stored in an LVM volume:
+     : sudo lxc-create --name $CNAME --template debian -- --release buster --package sudo,emacs,xfonts-base,tightvncserver,xfce4,xfce4-goodies,haskell-platform,haskell-stack,elpa-haskell-mode,elpa-smex,firefox-esr,xserver-xorg-core,curl,autocutsel,git,unar,rsync,bzip2
+  7. Start the container:
+     : sudo lxc-start --name $CNAME
+  8. Set a password for the root user:
+     : sudo lxc-attach --name $CNAME passwd
+  9. Add a user =dev= to the container:
+     : sudo lxc-attach --name $CNAME -- useradd -m -s /bin/bash dev
+  10. Set the password for the =dev= user:
+      : sudo lxc-attach --name $CNAME -- passwd dev
+  11. Add =dev= to the =sudo= group for the root privileges:
+      : sudo lxc-attach --name $CNAME -- usermod -a -G sudo dev
+  12. (Something here is missing about =TTY=; it is resolved by adding
+      the =dev= user via =visudo=).
+  13. Copy the public SSH key of your user on the host machine to the
+      =dev= user in the container:
+      : ssh-copy-id -i ~/.ssh/id_rsa.pub dev@192.168.122.195
+  14. Install the Keybase program (the 64-bit version):
+      : sudo lxc-attach --name $CNAME -- curl --output /tmp/keybase.deb --remote-name https://prerelease.keybase.io/keybase_amd64.deb
+      : sudo lxc-attach --name $CNAME -- sudo apt install -y /tmp/keybase.deb
+      : sudo lxc-attach --name $CNAME -- su - dev -c run_keybase
+  15. Start the VNC server as the =dev= user:
+      : sudo lxc-attach --name $CNAME -- su - dev -c vncserver
       This will ask for a password so create one.
-  11. Kill the VNC server:
-      : sudo lxc-attach --name buster-1 -- su - dev -c "vncserver -kill :1"
-  12. Put the following in =~/.vnc/xstartup= in the container:
+  16. Kill the VNC server:
+      : sudo lxc-attach --name $CNAME -- su - dev -c "vncserver -kill :1"
+  17. Put the following in =~/.vnc/xstartup= in the container:
       #+BEGIN_SRC bash
 	#!/bin/bash
 	xrdb $HOME/.Xresources
 	autocutsel -fork
 	startxfce4 &
       #+END_SRC
-  13. Start the VNC server again and set the screen resolution:
-      : sudo lxc-attach --name buster-1 -- su - dev -c "vncserver -geometry 1920x1080"
-  14. Install a VNC viewer on the host machine. I recommend Remmina, though
+  18. Start the VNC server again and set the screen resolution:
+      : sudo lxc-attach --name $CNAME -- su - dev -c "vncserver -geometry 2320x1305"
+  19. Install a VNC viewer on the host machine. I recommend Remmina, though
       others will work. GNOME's Remote Desktop Viewer captures certain
       keystrokes such as Ctrl+W, which means they cannot be used in the VNC
       session; this is why I decided to go with another VNC viewer, namely
       Remmina.
       : sudo apt-get install remmina remmina-plugin-vnc
-  15. Start a VNC viewer on the host machine. Provide the container's IP
+  20. Start a VNC viewer on the host machine. Provide the container's IP
       address and a port (the port is typically 5901).
 
 ** Installing Nix (an unfinished section)
@@ -89,9 +103,9 @@ LXC container:
   6. Copy the =nix_2.2.1-1_amd64.deb= package to the LXC container:
      : rsync -a --progress *deb dev@192.168.122.142:/tmp/
   7. In the LXC container install dependencies for the binary package for Nix:
-     : sudo lxc-attach --name buster-1 -- su - dev -c "sudo apt-get install -y libdbd-sqlite3-perl libwww-curl-perl libboost-context1.67.0 libbrotli1 libreadline7 libsodium23 perl-dbdabi-94 readline-common"
+     : sudo lxc-attach --name $CNAME -- su - dev -c "sudo apt-get install -y libdbd-sqlite3-perl libwww-curl-perl libboost-context1.67.0 libbrotli1 libreadline7 libsodium23 perl-dbdabi-94 readline-common"
   8. Finally install the =nix_2.2.1-1_amd64.deb= package:
-     : sudo lxc-attach --name buster-1 -- su - dev -c "sudo dpkg -i /tmp/nix_2.2.1-1_amd64.deb"
+     : sudo lxc-attach --name $CNAME -- su - dev -c "sudo dpkg -i /tmp/nix_2.2.1-1_amd64.deb"
   9. Add the following to =/etc/nix/nix.conf= in the container (create the
      file if it does not exist):
      : build-use-sandbox = false
@@ -105,7 +119,7 @@ LXC container:
   12. Restart =sysctl= on the host:
       : sudo sysctl --system
   13. Start the LXC container:
-      : sudo lxc-start --name buster-1
+      : sudo lxc-start --name $CNAME
 * To be done
 ** TODO Start the VNC server on system boot
    - This is not happening right now so enable it such that one doesn't have
@@ -115,6 +129,13 @@ LXC container:
      especially when Nix is used. When creating a container with =lxc-create=,
      there is an option =--bdev= that can take "lvm" as a value and further
      arguments can be provided, as explained in the man pages of =lxc-create=.
+     - [2019-08-28 wed]: I am not completely sure, but it might be the case
+       that I have to create LVM logical volumes via a live boot from
+       USB. When booted regularly from the disk, I attempted to run =sudo
+       lvcreate -L 50G -n buster-2 howard-vg=, but I get this:
+       : Insufficient free space: 12800 extents needed, but only 0 available
+       yet there is 173 GB of free space in the volume group according to the
+       output of =sudo vgdisplay=.
 ** TODO Share the camera, microphone and speaker devices with the container
 ** TODO Set up xmonad
 ** TODO Decrease the display lag
