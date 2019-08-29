@@ -38,8 +38,8 @@ use Logical Volume Management (LVM), skip steps that are tagged with "(LVM)".
   6. (LVM) To create a privileged container named "buster-2" with several
      things installed, where the root file system is stored in an LVM volume:
      : sudo lxc-create --name $CNAME --bdev lvm --lvname $LVNAME --vgname $VGNAME --fssize $FSSIZE --template debian -- --release buster --package $PKGS
-  7. To create a privileged container named "buster-2" with several
-     things installed, where the root file system is stored in an LVM volume:
+  7. To create a privileged container named "buster-2" with several things
+     installed, where the root file system is stored in a directory:
      : sudo lxc-create --name $CNAME --template debian -- --release buster --package $PKGS
   8. Start the container:
      : sudo lxc-start --name $CNAME
@@ -105,7 +105,7 @@ use Logical Volume Management (LVM), skip steps that are tagged with "(LVM)".
       address and a port (the port is typically 5901).
 
 ** Installing Nix (an unfinished section)
-One might want to install the Nix package manager as a number of Haskell
+One might want to install the Nix package manager because a number of Haskell
 projects use it as a build system. Unfortunately, there is no official Debian
 binary package for Nix. Therefore, we will build the package ourselves from an
 unofficial [[https://github.com/KaiHa/nix-debian][Debian source package]]. To install the Nix package manager in the
@@ -116,7 +116,7 @@ LXC container:
   2. Create a Debian GNU/Linux Buster image that will be used for building the
      package for Nix:
      : DIST=buster git-pbuilder create
-  3. Get the unofficial Debian source package:
+  3. Get the unofficial Debian source package from a Git repository:
      : git clone https://github.com/KaiHa/nix-debian.git
      : cd nix-debian
   4. Build a Debian binary package for Nix:
