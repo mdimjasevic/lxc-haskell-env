@@ -25,59 +25,83 @@ use Logical Volume Management (LVM), skip steps that are tagged with "(LVM)".
   1. Choose a name for the LXC container. In this running example =buster-2=
      will be used:
      : export CNAME=buster-2
-  2. (LVM) Choose an LVM volume group (set to the group you have on your host
+  2. Create a list of Debian packages to install. The list is stored in an
+     environment variable:
+     : export PKGS=sudo,emacs,xfonts-base,tightvncserver,xfce4,xfce4-goodies,x11-xserver-utils,dbus-x11,haskell-platform,haskell-stack,elpa-haskell-mode,elpa-smex,firefox-esr,xserver-xorg-core,curl,autocutsel,git,unar,rsync,bzip2
+  3. (LVM) Choose an LVM volume group (set to the group you have on your host
      machine):
      : export VGNAME=howard-vg
-  3. (LVM) Choose an LVM volume:
+  4. (LVM) Choose an LVM volume:
      : export LVNAME=$CNAME
-  4. (LVM) Choose the size of the container's root file system:
+  5. (LVM) Choose the size of the container's root file system:
      : export FSSIZE=50G
-  5. (LVM) To create a privileged container named "buster-2" with several
+  6. (LVM) To create a privileged container named "buster-2" with several
      things installed, where the root file system is stored in an LVM volume:
-     : sudo lxc-create --name $CNAME --bdev lvm --lvname $LVNAME --vgname $VGNAME --fssize $FSSIZE --template debian -- --release buster --package sudo,emacs,xfonts-base,tightvncserver,xfce4,xfce4-goodies,haskell-platform,haskell-stack,elpa-haskell-mode,elpa-smex,firefox-esr,xserver-xorg-core,curl,autocutsel,git,unar,rsync,bzip2
-  6. To create a privileged container named "buster-2" with several
+     : sudo lxc-create --name $CNAME --bdev lvm --lvname $LVNAME --vgname $VGNAME --fssize $FSSIZE --template debian -- --release buster --package $PKGS
+  7. To create a privileged container named "buster-2" with several
      things installed, where the root file system is stored in an LVM volume:
-     : sudo lxc-create --name $CNAME --template debian -- --release buster --package sudo,emacs,xfonts-base,tightvncserver,xfce4,xfce4-goodies,haskell-platform,haskell-stack,elpa-haskell-mode,elpa-smex,firefox-esr,xserver-xorg-core,curl,autocutsel,git,unar,rsync,bzip2
-  7. Start the container:
+     : sudo lxc-create --name $CNAME --template debian -- --release buster --package $PKGS
+  8. Start the container:
      : sudo lxc-start --name $CNAME
-  8. Set a password for the root user:
+  9. Set a password for the root user:
      : sudo lxc-attach --name $CNAME passwd
-  9. Add a user =dev= to the container:
-     : sudo lxc-attach --name $CNAME -- useradd -m -s /bin/bash dev
-  10. Set the password for the =dev= user:
+  10. Add a user =dev= to the container:
+      : sudo lxc-attach --name $CNAME -- useradd -m -s /bin/bash dev
+  11. Set the password for the =dev= user:
       : sudo lxc-attach --name $CNAME -- passwd dev
-  11. Add =dev= to the =sudo= group for the root privileges:
+  12. Add =dev= to the =sudo= group for the root privileges:
       : sudo lxc-attach --name $CNAME -- usermod -a -G sudo dev
-  12. (Something here is missing about =TTY=; it is resolved by adding
+  13. (Something here is missing about =TTY=; it is resolved by adding
       the =dev= user via =visudo=).
-  13. Copy the public SSH key of your user on the host machine to the
+  14. Copy the public SSH key of your user on the host machine to the
       =dev= user in the container:
       : ssh-copy-id -i ~/.ssh/id_rsa.pub dev@192.168.122.195
-  14. Install the Keybase program (the 64-bit version):
+  15. Install the Keybase program (the 64-bit version):
       : sudo lxc-attach --name $CNAME -- curl --output /tmp/keybase.deb --remote-name https://prerelease.keybase.io/keybase_amd64.deb
       : sudo lxc-attach --name $CNAME -- sudo apt install -y /tmp/keybase.deb
       : sudo lxc-attach --name $CNAME -- su - dev -c run_keybase
-  15. Start the VNC server as the =dev= user:
+  16. Start the VNC server as the =dev= user:
       : sudo lxc-attach --name $CNAME -- su - dev -c vncserver
       This will ask for a password so create one.
-  16. Kill the VNC server:
+  17. Kill the VNC server:
       : sudo lxc-attach --name $CNAME -- su - dev -c "vncserver -kill :1"
-  17. Put the following in =~/.vnc/xstartup= in the container:
+  18. Put the following in =~/.vnc/xstartup= in the container:
       #+BEGIN_SRC bash
 	#!/bin/bash
 	xrdb $HOME/.Xresources
 	autocutsel -fork
 	startxfce4 &
       #+END_SRC
-  18. Start the VNC server again and set the screen resolution:
-      : sudo lxc-attach --name $CNAME -- su - dev -c "vncserver -geometry 2320x1305"
-  19. Install a VNC viewer on the host machine. I recommend Remmina, though
+  19. Create a =systemd= service in =/etc/systemd/system/vncserver@1.service=
+      in the container:
+      #+BEGIN_SRC conf
+	[Unit]
+	Description=Remote desktop service (VNC)
+	After=syslog.target network.target
+
+	[Service]
+	Type=forking
+	User=dev
+
+	# Clean any existing files in /tmp/.X11-unix environment
+	ExecStartPre=/bin/bash -c '/usr/bin/vncserver -kill %i > /dev/null 2>&1 || :'
+	ExecStart=/usr/bin/vncserver -geometry 2320x1305
+	ExecStop=/usr/bin/vncserver -kill %i
+
+	[Install]
+	WantedBy=multi-user.target
+      #+END_SRC
+  20. Reload a service daemon, enable the service and start it:
+      : sudo systemctl daemon-reload
+      : sudo systemctl enable vncserver@1.service
+      : sudo systemctl start vncserver@1.service
+  21. Install a VNC viewer on the host machine. I recommend Remmina, though
       others will work. GNOME's Remote Desktop Viewer captures certain
       keystrokes such as Ctrl+W, which means they cannot be used in the VNC
       session; this is why I decided to go with another VNC viewer, namely
       Remmina.
       : sudo apt-get install remmina remmina-plugin-vnc
-  20. Start a VNC viewer on the host machine. Provide the container's IP
+  22. Start a VNC viewer on the host machine. Provide the container's IP
       address and a port (the port is typically 5901).
 
 ** Installing Nix (an unfinished section)
@@ -121,9 +145,6 @@ LXC container:
   13. Start the LXC container:
       : sudo lxc-start --name $CNAME
 * To be done
-** TODO Start the VNC server on system boot
-   - This is not happening right now so enable it such that one doesn't have
-     to SSH before VNCing.
 ** TODO Create LXC containers with a disk stored in LVM
    - The default is a 20 GB root partition =/=, which can be too little,
      especially when Nix is used. When creating a container with =lxc-create=,
