@@ -145,6 +145,10 @@ LXC container:
   13. Start the LXC container:
       : sudo lxc-start --name $CNAME
 * To be done
+** TODO See semi-official Debian source package for Nix
+   - https://salsa.debian.org/debian/nix
+     - This is referenced by the currently used Debian source package
+       for Nix.
 ** TODO Create LXC containers with a disk stored in LVM
    - The default is a 20 GB root partition =/=, which can be too little,
      especially when Nix is used. When creating a container with =lxc-create=,
