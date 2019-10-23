@@ -19,15 +19,16 @@ modifications).
 
 * Instructions
 
-These are instructions for LXC 3.0.3 in Debian GNU/Linux Buster. If you do not
-use Logical Volume Management (LVM), skip steps that are tagged with "(LVM)".
+These are instructions for LXC 3.0.3 in Debian GNU/Linux Buster. Follow the
+steps tagged "(LVM)" only if you use Logical Volume Management (LVM), in which
+case you should skip steps tagged (DIR).
 
   1. Choose a name for the LXC container. In this running example =buster-2=
      will be used:
      : export CNAME=buster-2
   2. Create a list of Debian packages to install. The list is stored in an
      environment variable:
-     : export PKGS=sudo,emacs,xfonts-base,tightvncserver,xfce4,xfce4-goodies,x11-xserver-utils,dbus-x11,haskell-platform,haskell-stack,elpa-haskell-mode,elpa-smex,firefox-esr,xserver-xorg-core,curl,autocutsel,git,unar,rsync,bzip2
+     : export PKGS=sudo,emacs,xfonts-base,tightvncserver,xfce4,xfce4-goodies,x11-xserver-utils,dbus-x11,haskell-platform,haskell-stack,elpa-haskell-mode,elpa-smex,firefox-esr,xserver-xorg-core,curl,autocutsel,git,unar,rsync,bzip2,wget
   3. (LVM) Choose an LVM volume group (set to the group you have on your host
      machine):
      : export VGNAME=howard-vg
@@ -38,7 +39,7 @@ use Logical Volume Management (LVM), skip steps that are tagged with "(LVM)".
   6. (LVM) To create a privileged container named "buster-2" with several
      things installed, where the root file system is stored in an LVM volume:
      : sudo lxc-create --name $CNAME --bdev lvm --lvname $LVNAME --vgname $VGNAME --fssize $FSSIZE --template debian -- --release buster --package $PKGS
-  7. To create a privileged container named "buster-2" with several things
+  7. (DIR) To create a privileged container named "buster-2" with several things
      installed, where the root file system is stored in a directory:
      : sudo lxc-create --name $CNAME --template debian -- --release buster --package $PKGS
   8. Start the container:
@@ -161,6 +162,8 @@ LXC container:
        : Insufficient free space: 12800 extents needed, but only 0 available
        yet there is 173 GB of free space in the volume group according to the
        output of =sudo vgdisplay=.
+       - On [2019-10-23 sri] I confirmed this is really the case: I had to
+         boot a live USB to create a new logical volume.
 ** TODO Share the camera, microphone and speaker devices with the container
 ** TODO Set up xmonad
 ** TODO Decrease the display lag
