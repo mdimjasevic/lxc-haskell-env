@@ -28,7 +28,7 @@ case you should skip steps tagged (DIR).
      : export CNAME=buster-2
   2. Create a list of Debian packages to install. The list is stored in an
      environment variable:
-     : export PKGS=sudo,emacs,xfonts-base,tightvncserver,xfce4,xfce4-goodies,x11-xserver-utils,dbus-x11,haskell-platform,haskell-stack,elpa-haskell-mode,elpa-smex,firefox-esr,xserver-xorg-core,curl,autocutsel,git,unar,rsync,bzip2,wget
+     : export PKGS=sudo,emacs,xfonts-base,tightvncserver,xfce4,xfce4-goodies,x11-xserver-utils,dbus-x11,haskell-platform,haskell-stack,elpa-haskell-mode,elpa-smex,firefox-esr,xserver-xorg-core,curl,autocutsel,git,unar,rsync,bzip2,wget,hlint
   3. (LVM) Choose an LVM volume group (set to the group you have on your host
      machine):
      : export VGNAME=howard-vg
