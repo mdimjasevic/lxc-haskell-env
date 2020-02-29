@@ -39,8 +39,8 @@ case you should skip steps tagged (DIR).
   6. (LVM) To create a privileged container named "buster-2" with several
      things installed, where the root file system is stored in an LVM volume:
      : sudo lxc-create --name $CNAME --bdev lvm --lvname $LVNAME --vgname $VGNAME --fssize $FSSIZE --template debian -- --release buster --package $PKGS
-  7. (DIR) To create a privileged container named "buster-2" with several things
-     installed, where the root file system is stored in a directory:
+  7. (DIR) To create a privileged container with several things installed,
+     where the root file system is stored in a directory:
      : sudo lxc-create --name $CNAME --template debian -- --release buster --package $PKGS
   8. Start the container:
      : sudo lxc-start --name $CNAME
