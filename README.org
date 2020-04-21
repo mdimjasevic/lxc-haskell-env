@@ -46,34 +46,36 @@ case you should skip steps tagged (DIR).
      : sudo lxc-start --name $CNAME
   9. Set a password for the root user:
      : sudo lxc-attach --name $CNAME passwd
-  10. Add a user =dev= to the container:
+  10. Install the packages given bz the PKGS variable:
+      : sudo lxc-attach --name $CNAME -- apt install $(echo $PKGS | tr "," " ")
+  11. Add a user =dev= to the container:
       : sudo lxc-attach --name $CNAME -- useradd -m -s /bin/bash dev
-  11. Set the password for the =dev= user:
+  12. Set the password for the =dev= user:
       : sudo lxc-attach --name $CNAME -- passwd dev
-  12. Add =dev= to the =sudo= group for the root privileges:
+  13. Add =dev= to the =sudo= group for the root privileges:
       : sudo lxc-attach --name $CNAME -- usermod -a -G sudo dev
-  13. (Something here is missing about =TTY=; it is resolved by adding
+  14. (Something here is missing about =TTY=; it is resolved by adding
       the =dev= user via =visudo=).
-  14. Copy the public SSH key of your user on the host machine to the
+  15. Copy the public SSH key of your user on the host machine to the
       =dev= user in the container:
       : ssh-copy-id -i ~/.ssh/id_rsa.pub dev@192.168.122.195
-  15. Install the Keybase program (the 64-bit version):
+  16. Install the Keybase program (the 64-bit version):
       : sudo lxc-attach --name $CNAME -- curl --output /tmp/keybase.deb --remote-name https://prerelease.keybase.io/keybase_amd64.deb
       : sudo lxc-attach --name $CNAME -- sudo apt install -y /tmp/keybase.deb
       : sudo lxc-attach --name $CNAME -- su - dev -c run_keybase
-  16. Start the VNC server as the =dev= user:
+  17. Start the VNC server as the =dev= user:
       : sudo lxc-attach --name $CNAME -- su - dev -c vncserver
       This will ask for a password so create one.
-  17. Kill the VNC server:
+  18. Kill the VNC server:
       : sudo lxc-attach --name $CNAME -- su - dev -c "vncserver -kill :1"
-  18. Put the following in =~/.vnc/xstartup= in the container:
+  19. Put the following in =~/.vnc/xstartup= in the container:
       #+BEGIN_SRC bash
 	#!/bin/bash
 	xrdb $HOME/.Xresources
 	autocutsel -fork
 	startxfce4 &
       #+END_SRC
-  19. Create a =systemd= service in =/etc/systemd/system/vncserver@1.service=
+  20. Create a =systemd= service in =/etc/systemd/system/vncserver@1.service=
       in the container:
       #+BEGIN_SRC conf
 	[Unit]
@@ -92,17 +94,17 @@ case you should skip steps tagged (DIR).
 	[Install]
 	WantedBy=multi-user.target
       #+END_SRC
-  20. Reload a service daemon, enable the service and start it:
+  21. Reload a service daemon, enable the service and start it:
       : sudo systemctl daemon-reload
       : sudo systemctl enable vncserver@1.service
       : sudo systemctl start vncserver@1.service
-  21. Install a VNC viewer on the host machine. I recommend Remmina, though
+  22. Install a VNC viewer on the host machine. I recommend Remmina, though
       others will work. GNOME's Remote Desktop Viewer captures certain
       keystrokes such as Ctrl+W, which means they cannot be used in the VNC
       session; this is why I decided to go with another VNC viewer, namely
       Remmina.
       : sudo apt-get install remmina remmina-plugin-vnc
-  22. Start a VNC viewer on the host machine. Provide the container's IP
+  23. Start a VNC viewer on the host machine. Provide the container's IP
       address and a port (the port is typically 5901).
 
 ** Installing Nix (an unfinished section)
